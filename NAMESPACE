@@ -2,3 +2,8 @@
 
 export(browse_units)
 export(cl_parse)
+export(plot_usage)
+import(ggplot2)
+importFrom(lubridate,as_datetime)
+importFrom(utils,browseURL)
+importFrom(utils,read.delim)

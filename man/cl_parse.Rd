@@ -12,7 +12,10 @@ cl_parse(path)
 \description{
 parse a collectl output -- could be conditional on discovered call
 }
+\note{
+A lubridate datetime is added as a column.
+}
 \examples{
-lk = cl_parse(system.file("demo/demo_1123.tab.gz", package="Rcollectl"))
+lk = cl_parse(system.file("demotab/demo_1123.tab.gz", package="Rcollectl"))
 head(lk)
 }

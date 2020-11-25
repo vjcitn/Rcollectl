@@ -1,6 +1,6 @@
 Package: Rcollectl
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.2
+Version: 0.0.3
 Date: 2020-11-23
 Authors@R: 
     person(given = "Vincent",

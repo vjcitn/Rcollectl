@@ -13,6 +13,6 @@ plot_usage(x)
 elementary display of usage data from collectl
 }
 \examples{
-lk = cl_parse(system.file("demo/demo_1123.tab.gz", package="Rcollectl"))
+lk = cl_parse(system.file("demotab/demo_1123.tab.gz", package="Rcollectl"))
 plot_usage(lk)
 }

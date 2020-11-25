@@ -2,6 +2,7 @@
 #' @importFrom lubridate as_datetime
 #' @importFrom utils browseURL read.delim
 #' @param path character(1) path to (possibly gzipped) collectl output
+#' @return a data.frame
 #' @note A lubridate datetime is added as a column.
 #' @examples
 #' lk = cl_parse(system.file("demotab/demo_1123.tab.gz", package="Rcollectl"))

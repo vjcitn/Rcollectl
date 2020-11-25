@@ -6,6 +6,14 @@
 \usage{
 browse_units()
 }
+\value{
+side effect is running browseURL
+}
 \description{
 browse a page defining units of collectl reporting
+}
+\examples{
+if (interactive()) {
+browse_units()
+}
 }

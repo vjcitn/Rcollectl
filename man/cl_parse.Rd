@@ -9,6 +9,9 @@ cl_parse(path)
 \arguments{
 \item{path}{character(1) path to (possibly gzipped) collectl output}
 }
+\value{
+a data.frame
+}
 \description{
 parse a collectl output -- could be conditional on discovered call
 }

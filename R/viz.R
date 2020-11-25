@@ -19,6 +19,7 @@ vizdf = function(x) {
 #' elementary display of usage data from collectl
 #' @import ggplot2
 #' @param x output of cl_parse
+#' @return ggplot with geom_point and facet_grid
 #' @examples
 #' lk = cl_parse(system.file("demotab/demo_1123.tab.gz", package="Rcollectl"))
 #' plot_usage(lk)

@@ -2,18 +2,23 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+
+<!--
 [![BioC
 status](http://www.bioconductor.org/shields/build/release/bioc/Rcollectl.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/Rcollectl)
 [![BioC dev
 status](http://www.bioconductor.org/shields/build/devel/bioc/Rcollectl.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/Rcollectl)
+-->
 [![R build
 status](https://github.com/vjcitn/Rcollectl/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/vjcitn/Rcollectl/actions)
 [![Codecov test
 coverage](https://codecov.io/gh/vjcitn/Rcollectl/branch/master/graph/badge.svg)](https://codecov.io/gh/vjcitn/Rcollectl?branch=master)
+<!--
 [![Support site activity, last 6 months: tagged questions/avg. answers
 per question/avg. comments per question/accepted answers, or 0 if no
 tagged
 posts.](http://www.bioconductor.org/shields/posts/Rcollectl.svg)](https://support.bioconductor.org/t/Rcollectl/)
+-->
 [![GitHub
 issues](https://img.shields.io/github/issues/vjcitn/Rcollectl)](https://github.com/vjcitn/Rcollectl/issues)
 <!-- badges: end -->

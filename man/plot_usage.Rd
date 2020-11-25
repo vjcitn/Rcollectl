@@ -9,6 +9,9 @@ plot_usage(x)
 \arguments{
 \item{x}{output of cl_parse}
 }
+\value{
+ggplot with geom_point and facet_grid
+}
 \description{
 elementary display of usage data from collectl
 }

@@ -25,5 +25,5 @@ vizdf = function(x) {
 #' plot_usage(lk)
 #' @export
 plot_usage = function(x)
-  ggplot(vizdf(lk), aes(x=tm, y=value)) + geom_point() + 
+  ggplot(vizdf(x), aes(x=tm, y=value)) + geom_point() + 
           facet_grid(vars(type), scales="free")

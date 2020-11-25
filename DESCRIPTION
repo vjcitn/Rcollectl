@@ -1,6 +1,6 @@
 Package: Rcollectl
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.4
+Version: 0.0.5
 Date: 2020-11-23
 Authors@R: 
     person(given = "Vincent",
@@ -26,5 +26,7 @@ Suggests:
     BiocStyle,
     knitcitations,
     sessioninfo,
-    rmarkdown
+    rmarkdown,
+    testthat,
+    covr
 VignetteBuilder: knitr

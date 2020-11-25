@@ -20,7 +20,7 @@ vizdf = function(x) {
 #' @import ggplot2
 #' @param x output of cl_parse
 #' @examples
-#' lk = cl_parse(system.file("demo/demo_1123.tab.gz", package="Rcollectl"))
+#' lk = cl_parse(system.file("demotab/demo_1123.tab.gz", package="Rcollectl"))
 #' plot_usage(lk)
 #' @export
 plot_usage = function(x)

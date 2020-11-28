@@ -13,3 +13,11 @@ test_that("plot_usage succeeds", {
  expect_true("ggplot" %in% class(x))
  expect_true("FacetGrid" %in% class(x$facet))
 })
+
+test_that("cl_start/stop succeed", {
+ lk = cl_start()
+ expect_true(lk$process$is_alive())
+ cl_stop(lk)
+ Sys.sleep(2)
+ expect_false(lk$process$is_alive())
+})

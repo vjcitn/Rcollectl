@@ -15,9 +15,11 @@ test_that("plot_usage succeeds", {
 })
 
 test_that("cl_start/stop succeed", {
- lk = cl_start()
- expect_true(lk$process$is_alive())
- cl_stop(lk)
- Sys.sleep(2)
- expect_false(lk$process$is_alive())
+ if (cl_exists()) {
+  lk = cl_start()
+  expect_true(lk$process$is_alive())
+  cl_stop(lk)
+  Sys.sleep(2)
+  expect_false(lk$process$is_alive())
+  }
 })

@@ -12,7 +12,7 @@ status](http://www.bioconductor.org/shields/build/devel/bioc/Rcollectl.svg)](htt
 [![R build
 status](https://github.com/vjcitn/Rcollectl/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/vjcitn/Rcollectl/actions)
 [![Codecov test
-coverage](https://codecov.io/gh/vjcitn/Rcollectl/branch/master/graph/badge.svg)](https://codecov.io/gh/vjcitn/Rcollectl?branch=master)
+coverage](https://codecov.io/gh/vjcitn/Rcollectl/branch/main/graph/badge.svg)](https://codecov.io/gh/vjcitn/Rcollectl?branch=main)
 <!--
 [![Support site activity, last 6 months: tagged questions/avg. answers
 per question/avg. comments per question/accepted answers, or 0 if no

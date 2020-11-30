@@ -25,10 +25,14 @@ issues](https://img.shields.io/github/issues/vjcitn/Rcollectl)](https://github.c
 
 # Rcollectl: simple interfaces to collectl output
 
-Instrumentation demonstrations are conducted using the [collectl](http://collectl.sourceforge.net/index.html) suite of tools.  
+Profiling R computations is supported by Rprof and profvis.  These measure memory consumption and
+function execution counts and timings.  In workflow design we are also interested in CPU load, disk I/O, and network
+traffic.  There is no standard portable approach to measuring these.  In this package, we focus
+on linux systems measurement with
+the [collectl](http://collectl.sourceforge.net/index.html) suite of tools.  
 
-These have been bundled in to the docker container vjcitn/instr:0.0.1, which is Rstudio-enabled.  The Dockerfile
-is shown below, and might be worth updating.
+These have been bundled in to the docker container vjcitn/instr:0.0.3, which is Rstudio-enabled.  The Dockerfile
+is shown below, tailored for use on app.terra.bio.
 
 Here's how we can use collectl:
 ```
@@ -81,13 +85,14 @@ Tot [DSK]KbTot [DSK]ReadMrgTot [DSK]WriteMrgTot [DSK]MrgTot
 
 ## Dockerfile follows:
 ```
-FROM us.gcr.io/anvil-gcr-public/anvil-rstudio-bioconductor:0.0.6
+FROM us.gcr.io/anvil-gcr-public/anvil-rstudio-bioconductor:0.0.8
 
 # This is to avoid the error
 # 'debconf: unable to initialize frontend: Dialog'
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -y update ; \
+    apt-get -y install libharfbuzz-dev libfribidi-dev ; \
     apt-get -y install collectl
 
 
@@ -100,4 +105,5 @@ USER root
 
 # Init command for s6-overlay
 CMD ["/init"]
+
 ```

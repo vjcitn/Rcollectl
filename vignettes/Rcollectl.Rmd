@@ -55,33 +55,7 @@ bib <- c(
 write.bibtex(bib, file = "Rcollectl.bib")
 ```
 
-# Basics
-
-## Install `Rcollectl`
-
-`R` is an open-source statistical environment which can be easily modified to enhance its functionality via packages. `r Biocpkg("Rcollectl")` is a `R` package available via github at `vjcitn/Rcollectl`.
-
-```{r "install", eval = FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-      install.packages("BiocManager")
-  }
-
-BiocManager::install("vjcitn/Rcollectl")
-
-## Check that you have a valid Bioconductor installation
-BiocManager::valid()
-```
-
-## Citing `Rcollectl`
-
-We hope that `r Biocpkg("Rcollectl")` will be useful for your research. Please use the following information to cite the package and the overall approach. Thank you!
-
-```{r "citation"}
-## Citation info
-citation("Rcollectl")
-```
-
-# Quick start to using to `Rcollectl`
+# Quick start for `Rcollectl`
 
 ```{r "start", message=FALSE}
 library("Rcollectl")
@@ -97,12 +71,6 @@ attr(lk, "meta")
 lk[1:5,1:5]
 ```
 
-Essentially, `collectl` will generate files like the .tab.gz referenced
-above.  `cl_parse` can ingest this information, retaining metadata about
-the invocation, into an R object
-(in this case, a `data.frame` instance with an extra
-attribute).  We will analyze the resource consumption using
-the table.  A simple visualization will help fix concepts:
 
 ```{r lkviz}
 plot_usage(lk)
@@ -113,6 +81,18 @@ around 14:43 is followed by consumption of CPU, memory, and disk resources.
 The % CPU active never exceeds 30, memory consumption started relatively
 high when sampling began, growing to about 15.5 GB. and 250MB were written
 to disk over the entire interval.
+
+To generate a display like this, we use commands shown below:
+
+```{r lklk,eval=FALSE}
+id = cl_start([target file prefix])
+[use R until task to be measured is complete]
+cl_stop(id)
+usage_df = cl_parse(dir(patt=[target file prefix]))
+# analyze or filter the usage_df (for example, to trim away
+# time related to task delay or delay of `cl_stop`
+plot_usage(usage_df)
+```
 
 
 # Reproducibility

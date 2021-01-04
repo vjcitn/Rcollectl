@@ -31,88 +31,28 @@ traffic.  There is no standard portable approach to measuring these.  In this pa
 on linux systems measurement with
 the [collectl](http://collectl.sourceforge.net/index.html) suite of tools.  
 
-These have been bundled in to the docker container vjcitn/instr:0.0.3, which is Rstudio-enabled.  The Dockerfile
-is shown below, tailored for use on app.terra.bio.
 
-Here's how we can use collectl:
-```
-collectl -scdmn -P -f./col1.txt &
-```
-This will background a process that will write into a file prefixed by  `col1.txt-` and suffixed by `.tab.gz`.
-Once the process is killed, the file is closed and available for reading.  It records information on system usage at 1-second intervals.
+## Notes from the AnVIL workspace description
 
-Here is an example of the output:
-```
-rstudio@saturn-8a436301-39c9-4c5e-9cb6-3cd154c9204d:~$ more col*tab
-################################################################################
-# Collectl:   V4.0.5-1  HiRes: 1  Options: -scdmn -P -f./col1.txt
-# Host:       saturn-8a436301-39c9-4c5e-9cb6-3cd154c9204d  DaemonOpts:
-# Booted:     1606157348.36 [20201123-18:49:08]
-# Distro:     debian buster/sid, Ubuntu 18.04.4 LTS  Platform: Unknown
-# Date:       20201123-185752  Secs: 1606157872 TZ: +0000
-# SubSys:     cdmn Options:  Interval: 1 NumCPUs: 4 [HYPER] NumBud: 0 Flags: i
-# Filters:    NfsFilt:  EnvFilt:  TcpFilt: ituc
-# HZ:         100  Arch: x86_64-linux-gnu-thread-multi PageSize: 4096
-# Cpu:        GenuineIntel Speed(MHz): 2300.000 Cores: 2  Siblings: 4 Nodes: 1
-# Kernel:     4.9.0-14-amd64  Memory: 15404688 kB  Swap: 0 kB
-# NumDisks:   2 DiskNames: sdb sda
-# NumNets:    3 NetNames: docker0:?? lo:?? eth0:-1
-################################################################################
-#Date Time [CPU]User% [CPU]Nice% [CPU]Sys% [CPU]Wait% [CPU]Irq% [CPU]Soft% [CPU]Steal% [CPU]Idle% [CPU
-]Totl% [CPU]Guest% [CPU]GuestN% [CPU]Intrpt/sec [CPU]Ctx/sec [CPU]Proc/sec [CPU]ProcQue [CPU]ProcRun [
-CPU]L-Avg1 [CPU]L-Avg5 [CPU]L-Avg15 [CPU]RunTot [CPU]BlkTot [MEM]Tot [MEM]Used [MEM]Free [MEM]Shared [
-MEM]Buf [MEM]Cached [MEM]Slab [MEM]Map [MEM]Anon [MEM]AnonH [MEM]Commit [MEM]Locked [MEM]SwapTot [MEM]
-SwapUsed [MEM]SwapFree [MEM]SwapIn [MEM]SwapOut [MEM]Dirty [MEM]Clean [MEM]Laundry [MEM]Inactive [MEM]
-PageIn [MEM]PageOut [MEM]PageFaults [MEM]PageMajFaults [MEM]HugeTotal [MEM]HugeFree [MEM]HugeRsvd [MEM
-]SUnreclaim [NET]RxPktTot [NET]TxPktTot [NET]RxKBTot [NET]TxKBTot [NET]RxCmpTot [NET]RxMltTot [NET]TxC
-mpTot [NET]RxErrsTot [NET]TxErrsTot [DSK]ReadTot [DSK]WriteTot [DSK]OpsTot [DSK]ReadKBTot [DSK]WriteKB
-Tot [DSK]KbTot [DSK]ReadMrgTot [DSK]WriteMrgTot [DSK]MrgTot
-20201123 18:57:54 1 0 0 0 0 0 0 99 1 0 0 2280 3556 1 413 0 0.03 0.57 0.45 0 0 15404688 8010132 7394556
- 0 726548 5955516 496572 284848 690188 0 3174836 0 0 0 0 0 0 32 0 0 5666612 0 0 212 0 0 0 0 32072 0 0
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-20201123 18:57:55 0 0 0 0 0 0 0 99 1 0 0 534 1027 0 413 0 0.03 0.57 0.45 0 0 15404688 8010048 7394640
-0 726548 5955516 496572 284848 690244 0 3174836 0 0 0 0 0 0 32 0 0 5666612 0 0 70 0 0 0 0 32072 0 0 0
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-20201123 18:57:56 0 0 0 0 0 0 0 100 0 0 0 608 1032 0 413 0 0.03 0.57 0.45 0 0 15404688 8010048 7394640
- 0 726548 5955516 496572 284848 690260 0 3174836 0 0 0 0 0 0 32 0 0 5666612 0 0 4 0 0 0 0 32072 0 0 0
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-20201123 18:57:57 1 0 0 0 0 0 0 99 1 0 0 656 1093 0 413 0 0.03 0.57 0.45 0 0 15404688 8010032 7394656
-0 726548 5955516 496508 284848 690260 0 3174836 0 0 0 0 0 0 28 0 0 5666612 0 0 1 0 0 0 0 32016 0 0 0 0
- 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Our objective in this workspace is demonstration of instrumentation of
+bioinformatic tasks.  By "instrumentation" we mean the definition and use
+of tools that measure computational resource consumption: memory, disk, CPU, network traffic.
 
-```
+(On AnVIL, we do not know how to identify the network device and data on network traffic
+are not obtained as of 1/1/2021.)
 
+This Dashboard Description discusses details of an example using [salmon](https://github.com/COMBINE-lab/salmon) to
+carry out quantification of an RNA-seq experiment.
 
-## Dockerfile follows:
-```
-FROM us.gcr.io/anvil-gcr-public/anvil-rstudio-bioconductor:0.0.8
+## Basic resources
 
-# This is to avoid the error
-# 'debconf: unable to initialize frontend: Dialog'
-ENV DEBIAN_FRONTEND noninteractive
+### Workspace backbone
 
-RUN apt-get -y update ; \
-    apt-get -y install libharfbuzz-dev libfribidi-dev ; \
-    apt-get -y install collectl
+This workspace was intitialized using AnVILPublish.  The runtime/cloud environment should use
 
+dockerhub vjcitn/instr:0.0.3
 
-
-# Add back other env vars
-RUN echo "TERRA_R_PLATFORM='anvil-rstudio-bioconductor'" >> /usr/local/lib/R/etc/Renviron.site \
-    && echo "TERRA_R_PLATFORM_BINARY_VERSION='0.99.1'" >> /usr/local/lib/R/etc/Renviron.site
-
-USER root
-
-# Init command for s6-overlay
-CMD ["/init"]
-
-```
-
-January 2 DESCRIPTION in AnVIL
-
-This workspace was introduced using AnVILPublish.  It was built using
-
-us.gcr.io/anvil-gcr-public/anvil-rstudio-bioconductor:0.0.8
+### Raw data
 
 The FASTQ files underlying the "airway" RNA-seq workflow were collected using commands like
 
@@ -126,7 +66,6 @@ gsutil -u landmarkanvil2 cp  gs://sra-pub-run-3/SRR1039521/SRR1039521.1 .
 ```
 
 A public bucket with the extracted fastq was then produced via
-
 ```
 fastq-dump --split-3 *512.1 &
 fastq-dump --split-3 *513.1 &
@@ -139,7 +78,142 @@ gsutil ls gs://bioc-airway-fastq
 gsutil cp SRR1039508.1_2.fastq.gz gs://bioc-airway-fastq/
 ```
 
+## Quantification process
+
+### Software and indexing resources
+
 Our aim is to analyze the resource consumption in processing this sort of data with
-R using Rcollectl.  We've run salmon to generate quantifications, on another system, and
+R using Rcollectl.  We'll describe how to run salmon to generate quantifications,and
 we will attempt to give estimates for processing various volumes of data by various
 approaches.
+
+We installed snakemake with pip3 and salmon via
+```
+wget https://github.com/COMBINE-lab/salmon/releases/download/v1.4.0/salmon-1.4.0_linux_x86_64.tar.gz
+```
+
+
+We obtained GENCODE transcript sequences:
+
+```
+wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_36/gencode.v36.transcripts.fa.gz
+```
+And built the index `gencode.v36_salmon_1.4.0` via
+
+```
+salmon index --gencode -t gencode.v36.transcripts.fa.gz -i gencode.v36_salmon_1.4.0
+```
+
+### Snakemake for workflow definition
+
+For a single sample (paired-end) we have a snakemake file:
+
+```
+rstudio@saturn-1f2f18e5-4182-40c0-8449-1f301b5c3b03:~$ cat snakemake_one
+DATASETS = ["SRR1039508.1"]
+
+SALMON = "/home/rstudio/bin/salmon"
+
+rule all:
+  input: expand("quants/{dataset}/quant.sf", dataset=DATASETS)
+
+rule salmon_quant:
+    input:
+        r1 = "fastq/{sample}_1.fastq.gz",
+        r2 = "fastq/{sample}_2.fastq.gz",
+        index = "/home/rstudio/gencode.v36_salmon_1.4.0"
+    output:
+        "quants/{sample}/quant.sf"
+    params:
+        dir = "quants/{sample}"
+    shell:
+        "{SALMON} quant -i {input.index} -l A -p 6 --validateMappings \
+         --gcBias --numGibbsSamples 20 -o {params.dir} \
+         -1 {input.r1} -2 {input.r2}"
+```
+
+When used with
+
+```
+snakemake -j1 --snakefile snakemake_one
+```
+
+it takes 6 minutes to produce a folder `quants` with content
+```
+└── SRR1039508.1
+    ├── aux_info
+    │   ├── ambig_info.tsv
+    │   ├── bootstrap
+    │   │   ├── bootstraps.gz
+    │   │   └── names.tsv.gz
+    │   ├── expected_bias.gz
+    │   ├── exp_gc.gz
+    │   ├── fld.gz
+    │   ├── meta_info.json
+    │   ├── observed_bias_3p.gz
+    │   ├── observed_bias.gz
+    │   └── obs_gc.gz
+    ├── cmd_info.json
+    ├── lib_format_counts.json
+    ├── libParams
+    │   └── flenDist.txt
+    ├── logs
+    │   └── salmon_quant.log
+    └── quant.sf
+```
+
+## Instrumentation of this process
+
+We use the Rcollectl package (which must be installed from github.com/vjcitn/Rcollectl) to
+monitor resource consumption while the snakemake process is running.
+
+### Single sample 6 threads
+
+Here is a display of the resource consumption for the single (paired-end) sample:
+
+![single sample usage profile](https://storage.googleapis.com/bioc-anvil-images/airway_onesamp_collectl.png)
+
+That run uses a setting of `-p 6` for `salmon quant`, which allows the algorithm to use 6 threads.   
+
+### Single sample 12 threads
+
+We
+used a 16 core machine, and raised the value of `-p` to 12 to obtain the following profile:
+
+![single sample usage, 12 threads](https://storage.googleapis.com/bioc-anvil-images/salmon_p12_one.png)
+
+### Eight samples 12 threads
+
+![eight samples 12 threads](https://storage.googleapis.com/bioc-anvil-images/salmon_p12_eight.png)
+
+It takes about 40 minutes to do the eight samples, using about 80% of the available CPUs and about 16
+GB RAM overall.
+
+### Four samples 3 threads 4 processes (-j4 for snakemake)
+
+Finally, we obtain some data to compare thread-based parallelism to process parallelism.  We'll
+reduce the number of threads per sample, but run 4 samples at once via snakemake -j argument.
+
+![four samples 3 threads -j4](https://storage.googleapis.com/bioc-anvil-images/salmon_p3_j4.png)
+
+It seems the throughput is a bit better here, but we should check the comparability
+of results of the different approaches before declaring this.
+
+## Conclusions
+
+Rcollectl can be used to obtain useful profiling information on AnVIL interactive work.  We saw
+that the salmon quantification could be tuned to consume 80-90% of available CPUs.  The
+RAM requirements and disk consumption are measurable.  It does not seem possible to decouple
+the NCPU from the RAM elements in a fine-grained way in AnVIL interactive cloud environments.  For 16 cores we could
+choose between 14.4 and 64 GB RAM.  64 GB seems too much for the task we are doing.
+
+Additional work of interest: snakemake is used only because a working snakefile was published.  We
+would like to be able to conduct these exercises in a more Bioconductor-native way.  Specifically,
+we should have an object representing the read data in a self-describing way, and use BiocParallel
+to manage the execution approach.  
+
+Furthermore, as we define the self-describing representation of the read
+data in Bioconductor, we should consider how it maps to the AnVIL/Terra-native
+structures related to the workspace data tables, and DRS.
+
+

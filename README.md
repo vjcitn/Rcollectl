@@ -48,7 +48,7 @@ carry out quantification of an RNA-seq experiment.
 
 ### Workspace backbone
 
-This workspace was intitialized using AnVILPublish.  The runtime/cloud environment should use
+This workspace was initialized using AnVILPublish.  The runtime/cloud environment used as of 2020-01-04 is
 
 dockerhub vjcitn/instr:0.0.3
 

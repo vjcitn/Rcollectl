@@ -1,4 +1,4 @@
-FROM us.gcr.io/anvil-gcr-public/anvil-rstudio-bioconductor:0.0.8
+FROM us.gcr.io/anvil-gcr-public/anvil-rstudio-bioconductor:3.13.2
 # intended for AnVIL with Rstudio
 
 # This is to avoid the error
@@ -9,6 +9,7 @@ RUN apt-get -y update ; \
     apt-get -y install libharfbuzz-dev libfribidi-dev ; \
     apt-get -y install collectl
 
+RUN R -e 'BiocManager::install(c("BiocStyle", "vjcitn/Rcollectl", "knitcitations"))'
 
 
 # Add back other env vars

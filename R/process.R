@@ -25,7 +25,9 @@ cl_exists = function() {
 #' @export
 cl_start = function(target = tempfile()) {
  proc = try(processx::process$new("collectl", args=c("-scdmn", "-P", paste("-f", target, sep=""))))
- ans = list(process=proc, target=target)
+ ans = list(process=proc, target=target, 
+            node_name=as.character(Sys.info()["nodename"]), 
+            date=format(Sys.Date(), "%Y%m%d"))
  class(ans) = "Rcollectl_process"
  ans
 }

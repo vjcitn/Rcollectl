@@ -41,7 +41,7 @@ cl_collectl_data <- function(arg) {
   else {
     file <- arg
   }
-  return(cl_parse(arg))
+  return(cl_parse(file))
 }
 
 # read in timestamp data

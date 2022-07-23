@@ -1,0 +1,244 @@
+---
+title: "workflow"
+output:
+  html_document: default
+  pdf_document: default
+date: '2022-07-20'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Track computing resources usage of single-cell analysis Workflow (follow workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) of hca dataset Census of Immune Cells.
+
+# Start for `Rcollectl`and download loom file
+
+```{r load Rcollectl, include=FALSE}
+Sys.setenv(PATH=paste0("/home/rstudio/collectl_bin/usr/bin:", Sys.getenv("PATH")))
+setwd("/home/rstudio/Rcollectl")
+devtools::load_all()
+setwd("/home/rstudio")
+```
+
+```{r cl_start, echo = TRUE, results = "hide"}
+id <- cl_start("hca_census_of_immune_cells")
+
+library(hca)
+library(SingleCellExperiment)
+library(LoomExperiment)
+library(dplyr)
+
+## download file
+files <- files(
+  filters(
+    projectTitle = list(is = "Census of Immune Cells"),
+    organPart = list(is = "bone marrow"),
+    fileFormat = list(is = "loom"),
+    isIntermediate = list(is = FALSE)
+  )
+)
+
+loom_file <- files_download(files)
+```
+
+# Step data preparation 
+
+```{r prep, echo = TRUE, results = "hide"}
+cl_timestamp(id, "prep")
+
+## import loom file
+sce_loom <- LoomExperiment::import(loom_file, type = "SingleCellLoomExperiment")
+
+## Using manifest data to annotate a .loom file
+sce_loom <- optimus_loom_annotation(sce_loom)
+
+## pre-process data
+library(SingleCellExperiment)
+sce_loom$donor <- colData(sce_loom)$donor_organism.biomaterial_core.biomaterial_id
+
+library(EnsDb.Hsapiens.v86)
+rowData(sce_loom)$Chr <- mapIds(EnsDb.Hsapiens.v86, keys=substring(rowData(sce_loom)$ensembl_ids, 1, 15), column="SEQNAME", keytype="GENEID")
+
+library(scater)
+rownames(sce_loom) <- uniquifyFeatureNames(substring(rowData(sce_loom)$ensembl_ids, 1, 15), names = rowData(sce_loom)$Gene)
+
+names(assays(sce_loom)) <- "counts"
+```
+
+# Step quality control
+
+```{r quality_control}
+cl_timestamp(id, "quality control")
+
+library(BiocParallel)
+library(scater)
+bpp <- MulticoreParam(32)
+sce_loom <- unfiltered <- addPerCellQC(sce_loom, BPPARAM=bpp, subsets=list(Mito=which(rowData(sce_loom)$Chr=="MT")))
+qc <- quickPerCellQC(colData(sce_loom), batch=sce_loom$donor, sub.fields="subsets_Mito_percent")
+
+sce_loom <- sce_loom[,!qc$discard]
+unfiltered$discard <- qc$discard
+
+## Distribution of QC metrics in the HCA bone marrow dataset. Each point represents a cell and is colored according to whether it was discarded
+gridExtra::grid.arrange(
+    plotColData(unfiltered, x="donor", y="sum", colour_by="discard") +
+        scale_y_log10() + ggtitle("Total count"),
+    plotColData(unfiltered, x="donor", y="detected", colour_by="discard") +
+        scale_y_log10() + ggtitle("Detected features"),
+    plotColData(unfiltered, x="donor", y="subsets_Mito_percent",
+                colour_by="discard") + ggtitle("Mito percent"),
+    ncol=2
+)
+
+## Percentage of mitochondrial reads in each cell in the HCA bone marrow dataset compared to its total count. Each point represents a cell and is colored according to whether that cell was discarded
+plotColData(unfiltered, x="sum", y="subsets_Mito_percent", colour_by="discard") + scale_x_log10()
+
+## Normalization
+sce_loom <- logNormCounts(sce_loom, size_factors = sce_loom$sum)
+```
+
+# Step variance modeling
+
+```{r variance_modeling}
+cl_timestamp(id, "variance modeling")
+
+library(scran)
+set.seed(101001)
+
+dec <- modelGeneVarByPoisson(sce_loom, block=sce_loom$donor, BPPARAM=bpp)
+top <- getTopHVGs(dec, n=5000)
+
+## Per-gene variance as a function of the mean for the log-expression values in the HCA bone marrow dataset. Each point represents a gene (black) with the mean-variance trend (blue) fitted to the variances
+par(mfrow=c(4,2))
+par(mar=c(1,1,1,1))
+blocked.stats <- dec$per.block
+for (i in colnames(blocked.stats)) {
+    current <- blocked.stats[[i]]
+    plot(current$mean, current$total, main=i, pch=16, cex=0.5,
+         xlab="Mean of log-expression", ylab="Variance of log-expression")
+    curfit <- metadata(current)
+    curve(curfit$trend(x), col='dodgerblue', add=TRUE, lwd=2)
+}
+```
+
+# Step data integration takes longer time.
+
+```{r data_integration}
+cl_timestamp(id, "data integration")
+
+library(batchelor)
+library(BiocNeighbors)
+
+set.seed(1010001)
+merged <- fastMNN(sce_loom, batch = sce_loom$donor, subset.row = top,
+                  BSPARAM=BiocSingular::RandomParam(deferred = TRUE), 
+                  BNPARAM=AnnoyParam(), BPPARAM=bpp)
+
+reducedDim(sce_loom, 'MNN') <- reducedDim(merged, 'corrected')
+metadata(merged)$merge.info$lost.var
+```
+
+# Step dimensionality reduction
+
+```{r dimensionality_reduction}
+cl_timestamp(id, "dimensionality reduction")
+
+library(uwot)
+set.seed(1010001)
+sce_loom <- runUMAP(sce_loom, dimred="MNN",
+                    external_neighbors=TRUE, 
+                    BNPARAM=AnnoyParam(),
+                    BPPARAM=bpp,
+                    n_threads=bpnworkers(bpp))
+```
+
+# Step clustering
+
+```{r clustering}
+cl_timestamp(id, "clustering")
+
+library(bluster)
+
+set.seed(1010001)
+colLabels(sce_loom) <- clusterRows(reducedDim(sce_loom, "MNN"), TwoStepParam(KmeansParam(centers=1000), NNGraphParam(k=5)))
+
+table(colLabels(sce_loom))
+
+tab <- table(Cluster=colLabels(sce_loom), donor=sce_loom$donor)
+
+## Heatmap of log10-number of cells in each cluster (row) from each sample (column)
+library(pheatmap)
+pheatmap(log10(tab+10), color=viridis::viridis(100))
+
+scrambled <- sample(ncol(sce_loom))
+
+## UMAP plots of the HCA bone marrow dataset after merging. Each point represents a cell and is colored according to the assigned cluster (top) or the donor of origin (bottom)
+gridExtra::grid.arrange(
+    plotUMAP(sce_loom, colour_by="label", text_by="label"),
+    plotUMAP(sce_loom[,scrambled], colour_by="donor")
+)
+```
+
+# Step differential expression
+
+```{r differential_expression}
+cl_timestamp(id, "differential expression")
+
+markers <- findMarkers(sce_loom, block = sce_loom$donor, direction = 'up', lfc = 1, BPPARAM=bpp)
+
+top.markers <- markers[["4"]]
+best <- top.markers[top.markers$Top <= 10,]
+lfcs <- getMarkerEffects(best)
+
+## Heatmap of log2-fold changes for the top marker genes (rows) of cluster 4 compared to all other clusters (columns)
+pheatmap(lfcs, breaks=seq(-5, 5, length.out=101))
+```
+
+# Step cell type classification
+
+```{r cell_type_classification}
+cl_timestamp(id, "cell type classification")
+
+se.aggregated <- sumCountsAcrossCells(sce_loom, id=colLabels(sce_loom), BPPARAM=bpp)
+
+library(celldex)
+hpc <- HumanPrimaryCellAtlasData()
+
+library(SingleR)
+anno.single <- SingleR(se.aggregated, ref = hpc, labels = hpc$label.main, assay.type.test="sum")
+anno.single
+```
+
+
+# Stop `Rcollectl`
+
+```{r cl_stop}
+cl_stop(id)
+```
+
+# Plot collectl result
+
+```{r plot_all}
+path <- cl_result_path(id)
+plot_usage(cl_parse(path))
+```
+
+# Plot collectl result with time stamp
+
+```{r plot_timestamp}
+path <- cl_result_path(id)
+plot_usage(cl_parse(path)) +
+  cl_timestamp_layer(path) +
+  cl_timestamp_label(path) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+`R` session information.
+
+```{r session_info, echo=FALSE}
+## Session info
+library("sessioninfo")
+options(width = 120)
+session_info()
+```

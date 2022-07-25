@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Track computing resources usage of single-cell analysis Workflow (follow workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) of hca dataset Census of Immune Cells.
 
-# Start for `Rcollectl`and download loom file
+## Start for `Rcollectl`and download loom file
 
 ```{r load Rcollectl, include=FALSE}
 Sys.setenv(PATH=paste0("/home/rstudio/collectl_bin/usr/bin:", Sys.getenv("PATH")))
@@ -21,7 +21,7 @@ devtools::load_all()
 setwd("/home/rstudio")
 ```
 
-```{r cl_start, echo = TRUE, results = "hide"}
+```{r cl_start, echo = TRUE, message=FALSE}
 id <- cl_start("hca_census_of_immune_cells")
 
 library(hca)
@@ -42,9 +42,9 @@ files <- files(
 loom_file <- files_download(files)
 ```
 
-# Step data preparation 
+## Step data preparation 
 
-```{r prep, echo = TRUE, results = "hide"}
+```{r prep, echo = TRUE, message=FALSE}
 cl_timestamp(id, "prep")
 
 ## import loom file
@@ -66,9 +66,9 @@ rownames(sce_loom) <- uniquifyFeatureNames(substring(rowData(sce_loom)$ensembl_i
 names(assays(sce_loom)) <- "counts"
 ```
 
-# Step quality control
+## Step quality control
 
-```{r quality_control}
+```{r quality_control, message=FALSE}
 cl_timestamp(id, "quality control")
 
 library(BiocParallel)
@@ -98,9 +98,9 @@ plotColData(unfiltered, x="sum", y="subsets_Mito_percent", colour_by="discard") 
 sce_loom <- logNormCounts(sce_loom, size_factors = sce_loom$sum)
 ```
 
-# Step variance modeling
+## Step variance modeling
 
-```{r variance_modeling}
+```{r variance_modeling, message=FALSE}
 cl_timestamp(id, "variance modeling")
 
 library(scran)
@@ -122,9 +122,10 @@ for (i in colnames(blocked.stats)) {
 }
 ```
 
-# Step data integration takes longer time.
+## Step data integration
 
-```{r data_integration}
+```{r data_integration, message=FALSE}
+# This step takes longer time
 cl_timestamp(id, "data integration")
 
 library(batchelor)
@@ -139,9 +140,9 @@ reducedDim(sce_loom, 'MNN') <- reducedDim(merged, 'corrected')
 metadata(merged)$merge.info$lost.var
 ```
 
-# Step dimensionality reduction
+## Step dimensionality reduction
 
-```{r dimensionality_reduction}
+```{r dimensionality_reduction, message=FALSE}
 cl_timestamp(id, "dimensionality reduction")
 
 library(uwot)
@@ -153,9 +154,9 @@ sce_loom <- runUMAP(sce_loom, dimred="MNN",
                     n_threads=bpnworkers(bpp))
 ```
 
-# Step clustering
+## Step clustering
 
-```{r clustering}
+```{r clustering, message=FALSE}
 cl_timestamp(id, "clustering")
 
 library(bluster)
@@ -180,9 +181,9 @@ gridExtra::grid.arrange(
 )
 ```
 
-# Step differential expression
+## Step differential expression
 
-```{r differential_expression}
+```{r differential_expression, message=FALSE}
 cl_timestamp(id, "differential expression")
 
 markers <- findMarkers(sce_loom, block = sce_loom$donor, direction = 'up', lfc = 1, BPPARAM=bpp)
@@ -195,9 +196,9 @@ lfcs <- getMarkerEffects(best)
 pheatmap(lfcs, breaks=seq(-5, 5, length.out=101))
 ```
 
-# Step cell type classification
+## Step cell type classification
 
-```{r cell_type_classification}
+```{r cell_type_classification, message=FALSE}
 cl_timestamp(id, "cell type classification")
 
 se.aggregated <- sumCountsAcrossCells(sce_loom, id=colLabels(sce_loom), BPPARAM=bpp)
@@ -211,20 +212,20 @@ anno.single
 ```
 
 
-# Stop `Rcollectl`
+## Stop `Rcollectl`
 
 ```{r cl_stop}
 cl_stop(id)
 ```
 
-# Plot collectl result
+## Plot collectl result
 
 ```{r plot_all}
 path <- cl_result_path(id)
 plot_usage(cl_parse(path))
 ```
 
-# Plot collectl result with time stamp
+## Plot collectl result with time stamp
 
 ```{r plot_timestamp}
 path <- cl_result_path(id)

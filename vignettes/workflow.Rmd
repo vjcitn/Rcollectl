@@ -1,8 +1,7 @@
 ---
-title: "workflow"
+title: "Single-Cell Analysis Workflow of Loom File"
 output:
   html_document: default
-  pdf_document: default
 date: '2022-07-20'
 ---
 
@@ -14,20 +13,14 @@ Track computing resources usage of single-cell analysis Workflow (follow workflo
 
 ## Start for `Rcollectl`and download loom file
 
-```{r load Rcollectl, include=FALSE}
-Sys.setenv(PATH=paste0("/home/rstudio/collectl_bin/usr/bin:", Sys.getenv("PATH")))
-setwd("/home/rstudio/Rcollectl")
-devtools::load_all()
-setwd("/home/rstudio")
-```
-
 ```{r cl_start, echo = TRUE, message=FALSE}
-id <- cl_start("hca_census_of_immune_cells")
-
+library(Rcollectl)
 library(hca)
 library(SingleCellExperiment)
 library(LoomExperiment)
 library(dplyr)
+
+id <- cl_start("hca_census_of_immune_cells")
 
 ## download file
 files <- files(
@@ -73,7 +66,7 @@ cl_timestamp(id, "quality control")
 
 library(BiocParallel)
 library(scater)
-bpp <- MulticoreParam(32)
+bpp <- MulticoreParam(parallel::detectCores())
 sce_loom <- unfiltered <- addPerCellQC(sce_loom, BPPARAM=bpp, subsets=list(Mito=which(rowData(sce_loom)$Chr=="MT")))
 qc <- quickPerCellQC(colData(sce_loom), batch=sce_loom$donor, sub.fields="subsets_Mito_percent")
 

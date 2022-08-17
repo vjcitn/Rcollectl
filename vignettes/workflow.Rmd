@@ -1,46 +1,69 @@
 ---
-title: "Single-Cell Analysis Workflow of Loom File"
+title: "Single-Cell Analysis Workflow of HCA Loom File"
 output:
   html_document: default
 date: '2022-07-20'
+vignette: >
+  %\VignetteIndexEntry{Single-Cell Analysis Workflow of HCA Loom File}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8} 
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Track computing resources usage of single-cell analysis Workflow (follow workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) of hca dataset Census of Immune Cells.
+This vignette follows single-cell analysis Workflow (workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) to analyze loom file from HCA dataset Census of Immune Cells and tracks computing resources usage.
 
-## Start for `Rcollectl`and download loom file
+## Set up parameters
+
+File id of loom file to analyze could be obtained using package `hca`, and one example shows below.
+
+```{r, echo = TRUE, message=FALSE}
+library(hca)
+library(dplyr)
+files(filters(
+    projectTitle = list(is = "Census of Immune Cells"),
+    organPart = list(is = "bone marrow"),
+    fileFormat = list(is = "loom"),
+    isIntermediate = list(is = FALSE))
+)
+fileid <- "902ac276-d7bf-5ae2-b89d-f80096a0b310"
+```
+
+Column to analyze needs to be specified from colData of the dataset, potential targets could be donor_organism.biomaterial_core.biomaterial_id, cell_suspension.biomaterial_core.biomaterial_id, etc.
+
+```{r, echo = TRUE, message=FALSE}
+sample <- "donor_organism.biomaterial_core.biomaterial_id"
+```
+
+With two parameters set up, workflow could be started. 
+
+## Start for `Rcollectl` and download loom file
 
 ```{r cl_start, echo = TRUE, message=FALSE}
 library(Rcollectl)
 library(hca)
-library(SingleCellExperiment)
-library(LoomExperiment)
 library(dplyr)
 
-id <- cl_start("hca_census_of_immune_cells")
+## identify target loom file
+myfile <- files(filters(fileId = list(is = fileid)))
+
+## start Rcollectl
+id <- cl_start(gsub('.loom', '', myfile$name))
 
 ## download file
-files <- files(
-  filters(
-    projectTitle = list(is = "Census of Immune Cells"),
-    organPart = list(is = "bone marrow"),
-    fileFormat = list(is = "loom"),
-    isIntermediate = list(is = FALSE)
-  )
-)
-
-loom_file <- files_download(files)
+loom_file <- files_download(myfile)
 ```
 
 ## Step data preparation 
 
-```{r prep, echo = TRUE, message=FALSE}
-cl_timestamp(id, "prep")
+```{r data_preparation, echo = TRUE, message=FALSE}
+# record start time of each step
+cl_timestamp(id, "data preparation")
 
 ## import loom file
+library(LoomExperiment)
 sce_loom <- LoomExperiment::import(loom_file, type = "SingleCellLoomExperiment")
 
 ## Using manifest data to annotate a .loom file
@@ -48,7 +71,7 @@ sce_loom <- optimus_loom_annotation(sce_loom)
 
 ## pre-process data
 library(SingleCellExperiment)
-sce_loom$donor <- colData(sce_loom)$donor_organism.biomaterial_core.biomaterial_id
+sce_loom$sample <- colData(sce_loom)[, sample]
 
 library(EnsDb.Hsapiens.v86)
 rowData(sce_loom)$Chr <- mapIds(EnsDb.Hsapiens.v86, keys=substring(rowData(sce_loom)$ensembl_ids, 1, 15), column="SEQNAME", keytype="GENEID")
@@ -68,18 +91,18 @@ library(BiocParallel)
 library(scater)
 bpp <- MulticoreParam(parallel::detectCores())
 sce_loom <- unfiltered <- addPerCellQC(sce_loom, BPPARAM=bpp, subsets=list(Mito=which(rowData(sce_loom)$Chr=="MT")))
-qc <- quickPerCellQC(colData(sce_loom), batch=sce_loom$donor, sub.fields="subsets_Mito_percent")
+qc <- quickPerCellQC(colData(sce_loom), batch=sce_loom$sample, sub.fields="subsets_Mito_percent")
 
 sce_loom <- sce_loom[,!qc$discard]
 unfiltered$discard <- qc$discard
 
 ## Distribution of QC metrics in the HCA bone marrow dataset. Each point represents a cell and is colored according to whether it was discarded
 gridExtra::grid.arrange(
-    plotColData(unfiltered, x="donor", y="sum", colour_by="discard") +
+    plotColData(unfiltered, x="sample", y="sum", colour_by="discard") +
         scale_y_log10() + ggtitle("Total count"),
-    plotColData(unfiltered, x="donor", y="detected", colour_by="discard") +
+    plotColData(unfiltered, x="sample", y="detected", colour_by="discard") +
         scale_y_log10() + ggtitle("Detected features"),
-    plotColData(unfiltered, x="donor", y="subsets_Mito_percent",
+    plotColData(unfiltered, x="sample", y="subsets_Mito_percent",
                 colour_by="discard") + ggtitle("Mito percent"),
     ncol=2
 )
@@ -89,6 +112,7 @@ plotColData(unfiltered, x="sum", y="subsets_Mito_percent", colour_by="discard") 
 
 ## Normalization
 sce_loom <- logNormCounts(sce_loom, size_factors = sce_loom$sum)
+summary(sizeFactors(sce_loom))
 ```
 
 ## Step variance modeling
@@ -99,7 +123,7 @@ cl_timestamp(id, "variance modeling")
 library(scran)
 set.seed(101001)
 
-dec <- modelGeneVarByPoisson(sce_loom, block=sce_loom$donor, BPPARAM=bpp)
+dec <- modelGeneVarByPoisson(sce_loom, block=sce_loom$sample, BPPARAM=bpp)
 top <- getTopHVGs(dec, n=5000)
 
 ## Per-gene variance as a function of the mean for the log-expression values in the HCA bone marrow dataset. Each point represents a gene (black) with the mean-variance trend (blue) fitted to the variances
@@ -125,7 +149,7 @@ library(batchelor)
 library(BiocNeighbors)
 
 set.seed(1010001)
-merged <- fastMNN(sce_loom, batch = sce_loom$donor, subset.row = top,
+merged <- fastMNN(sce_loom, batch = sce_loom$sample, subset.row = top,
                   BSPARAM=BiocSingular::RandomParam(deferred = TRUE), 
                   BNPARAM=AnnoyParam(), BPPARAM=bpp)
 
@@ -159,7 +183,7 @@ colLabels(sce_loom) <- clusterRows(reducedDim(sce_loom, "MNN"), TwoStepParam(Kme
 
 table(colLabels(sce_loom))
 
-tab <- table(Cluster=colLabels(sce_loom), donor=sce_loom$donor)
+tab <- table(Cluster=colLabels(sce_loom), sample=sce_loom$sample)
 
 ## Heatmap of log10-number of cells in each cluster (row) from each sample (column)
 library(pheatmap)
@@ -167,10 +191,10 @@ pheatmap(log10(tab+10), color=viridis::viridis(100))
 
 scrambled <- sample(ncol(sce_loom))
 
-## UMAP plots of the HCA bone marrow dataset after merging. Each point represents a cell and is colored according to the assigned cluster (top) or the donor of origin (bottom)
+## UMAP plots of the HCA bone marrow dataset after merging. Each point represents a cell and is colored according to the assigned cluster (top) or the sample of origin (bottom)
 gridExtra::grid.arrange(
     plotUMAP(sce_loom, colour_by="label", text_by="label"),
-    plotUMAP(sce_loom[,scrambled], colour_by="donor")
+    plotUMAP(sce_loom[,scrambled], colour_by="sample")
 )
 ```
 
@@ -179,7 +203,7 @@ gridExtra::grid.arrange(
 ```{r differential_expression, message=FALSE}
 cl_timestamp(id, "differential expression")
 
-markers <- findMarkers(sce_loom, block = sce_loom$donor, direction = 'up', lfc = 1, BPPARAM=bpp)
+markers <- findMarkers(sce_loom, block = sce_loom$sample, direction = 'up', lfc = 1, BPPARAM=bpp)
 
 top.markers <- markers[["4"]]
 best <- top.markers[top.markers$Top <= 10,]
@@ -228,7 +252,7 @@ plot_usage(cl_parse(path)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 
-`R` session information.
+## `R` session information
 
 ```{r session_info, echo=FALSE}
 ## Session info

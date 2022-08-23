@@ -2,7 +2,9 @@
 title: "Single-Cell Analysis Workflow of HCA Loom File"
 output:
   html_document: default
-date: '2022-07-20'
+params:
+  fileid: "902ac276-d7bf-5ae2-b89d-f80096a0b310"
+  sample: "donor_organism.biomaterial_core.biomaterial_id"
 vignette: >
   %\VignetteIndexEntry{Single-Cell Analysis Workflow of HCA Loom File}
   %\VignetteEngine{knitr::rmarkdown}
@@ -13,7 +15,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
-This vignette follows single-cell analysis Workflow (workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) to analyze loom file from HCA dataset Census of Immune Cells and tracks computing resources usage.
+This vignette follows single-cell analysis Workflow (workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) to analyze loom file from HCA dataset and tracks computing resources usage.
 
 ## Set up parameters
 
@@ -28,13 +30,13 @@ files(filters(
     fileFormat = list(is = "loom"),
     isIntermediate = list(is = FALSE))
 )
-fileid <- "902ac276-d7bf-5ae2-b89d-f80096a0b310"
+fileid <- params$fileid
 ```
 
 Column to analyze needs to be specified from colData of the dataset, potential targets could be donor_organism.biomaterial_core.biomaterial_id, cell_suspension.biomaterial_core.biomaterial_id, etc.
 
 ```{r, echo = TRUE, message=FALSE}
-sample <- "donor_organism.biomaterial_core.biomaterial_id"
+sample <- params$sample
 ```
 
 With two parameters set up, workflow could be started. 
@@ -227,7 +229,6 @@ library(SingleR)
 anno.single <- SingleR(se.aggregated, ref = hpc, labels = hpc$label.main, assay.type.test="sum")
 anno.single
 ```
-
 
 ## Stop `Rcollectl`
 

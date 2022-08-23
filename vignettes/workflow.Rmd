@@ -3,6 +3,7 @@ title: "Single-Cell Analysis Workflow of HCA Loom File"
 output:
   html_document: default
 params:
+  knitr_eval: FALSE
   fileId: "902ac276-d7bf-5ae2-b89d-f80096a0b310"
   sample: "donor_organism.biomaterial_core.biomaterial_id"
 vignette: >
@@ -12,7 +13,7 @@ vignette: >
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE, eval = params$knitr_eval)
 ```
 
 This vignette follows single-cell analysis Workflow (workflow chapters of the “Orchestrating Single-Cell Analysis with Bioconductor” book) to analyze loom file from HCA dataset and tracks computing resources usage.
@@ -57,7 +58,7 @@ library(hca)
 library(dplyr)
 
 ## identify target loom file
-myfile <- files(filters(fileId = list(is = fileid)))
+myfile <- files(filters(fileId = list(is = fileId)))
 
 ## start Rcollectl
 id <- cl_start(gsub('.loom', '', myfile$name))

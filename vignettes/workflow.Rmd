@@ -3,7 +3,7 @@ title: "Single-Cell Analysis Workflow of HCA Loom File"
 output:
   html_document: default
 params:
-  fileid: "902ac276-d7bf-5ae2-b89d-f80096a0b310"
+  fileId: "902ac276-d7bf-5ae2-b89d-f80096a0b310"
   sample: "donor_organism.biomaterial_core.biomaterial_id"
 vignette: >
   %\VignetteIndexEntry{Single-Cell Analysis Workflow of HCA Loom File}
@@ -30,13 +30,21 @@ files(filters(
     fileFormat = list(is = "loom"),
     isIntermediate = list(is = FALSE))
 )
-fileid <- params$fileid
+```
+
+```{r, echo = TRUE, message=FALSE, eval=TRUE}
+fileId <- params$fileId
 ```
 
 Column to analyze needs to be specified from colData of the dataset, potential targets could be donor_organism.biomaterial_core.biomaterial_id, cell_suspension.biomaterial_core.biomaterial_id, etc.
 
-```{r, echo = TRUE, message=FALSE}
+```{r, echo = TRUE, message=FALSE, eval=TRUE}
 sample <- params$sample
+```
+
+```{r, echo = TRUE, message=FALSE, eval=TRUE}
+fileId
+sample
 ```
 
 With two parameters set up, workflow could be started. 

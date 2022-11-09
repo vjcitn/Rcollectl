@@ -67,5 +67,5 @@ cl_stop = function(proc) {
 cl_result_path = function(proc) {
  stopifnot(inherits(proc, "Rcollectl_process"))
  dn = dirname(proc$target)
- paste0(dn, "/", proc$target, "-", proc$node_name, "-", proc$date, ".tab.gz")
+ paste0(proc$target, "-", proc$node_name, "-", proc$date, ".tab.gz")
 }

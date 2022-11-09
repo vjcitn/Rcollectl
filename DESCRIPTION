@@ -1,6 +1,6 @@
 Package: Rcollectl
 Title: Help use collectl with R in Linux
-Version: 0.0.14
+Version: 0.0.15
 Date: 2022-11-09
 Authors@R: 
     person(given = "Vincent",

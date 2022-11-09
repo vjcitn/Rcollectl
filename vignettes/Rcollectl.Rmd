@@ -99,7 +99,8 @@ plot_usage(usage_df)
 Yubo Cheng has added functionality allowing us to annotate
 usage plots with labels related to task phases.
 
-```{r lkts}
+```{r lkts, eval=FALSE}
+# github action is failing here, let's see if that's all 
 example(cl_timestamp, ask=FALSE)
 ```
 

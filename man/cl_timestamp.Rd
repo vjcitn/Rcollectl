@@ -10,7 +10,7 @@ cl_timestamp(proc, step)
 
 cl_timestamp_layer(arg)
 
-cl_timestamp_label(arg)
+cl_timestamp_label(arg, tz = "EST")
 }
 \arguments{
 \item{proc}{an entity inheriting from "Rcollectl_process" S3 class}
@@ -28,7 +28,8 @@ cl_timestamp_label(arg)
 Functions to add time stamps to collectl output
 }
 \examples{
-id <- cl_start("id_name")
+randname = basename(tempfile())
+id <- cl_start(randname)
 Sys.sleep(2)
 #code
 cl_timestamp(id, "step1")

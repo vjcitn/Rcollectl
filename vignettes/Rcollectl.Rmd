@@ -94,6 +94,15 @@ usage_df = cl_parse(dir(patt=[target file prefix]))
 plot_usage(usage_df)
 ```
 
+# Timestamps
+
+Yubo Cheng has added functionality allowing us to annotate
+usage plots with labels related to task phases.
+
+```{r lkts}
+example(cl_timestamp, ask=FALSE)
+```
+
 
 # Reproducibility
 

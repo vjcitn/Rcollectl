@@ -10,7 +10,8 @@ cl_timestamp_file <- function(proc) {
 #' @param step character(1) name of step within a workflow
 #' @return `cl_timestamp()` returns a tab delimited text file
 #' @examples
-#' id <- cl_start("id_name")
+#' randname = basename(tempfile())
+#' id <- cl_start(randname)
 #' Sys.sleep(2)
 #' #code
 #' cl_timestamp(id, "step1")
@@ -46,7 +47,7 @@ cl_collectl_data <- function(arg) {
 }
 
 # read in timestamp data
-cl_timestamp_data <- function(arg) {
+cl_timestamp_data <- function(arg, tz="EST") {
   if (inherits(arg, "Rcollectl_process")) {
     file <- cl_timestamp_file(arg)
   } else {
@@ -54,7 +55,7 @@ cl_timestamp_data <- function(arg) {
   }
   timestamps <- read.delim(file, header = FALSE,
     col.names = c("Step", "sampdate"), sep = "\t")
-  timestamps$sampdate <- as.POSIXct(timestamps$sampdate)
+  timestamps$sampdate <- as.POSIXct(timestamps$sampdate, tz=tz)
   return(timestamps)
 }
 
@@ -78,19 +79,19 @@ cl_timestamp_layer <- function(arg) {
 
 #' @rdname cl_timestamp
 #' @export
-cl_timestamp_label <- function(arg) {
+cl_timestamp_label <- function(arg, tz="EST") {
   usage_df_all <- cl_collectl_data(arg)
   timestamps <- cl_timestamp_data(arg)
 
   xlabel_time <- as.numeric(round(
     difftime(
-      as.POSIXct(timestamps$sampdate),
-      as.POSIXct(usage_df_all[1, "sampdate"]),
+      as.POSIXct(timestamps$sampdate, tz=tz),
+      as.POSIXct(usage_df_all[1, "sampdate"], tz=tz),
       units='mins')
   ))
   xlabel_time <- sprintf("%d:%02d", floor(xlabel_time / 60), xlabel_time %% 60)
 
   scale_x_continuous(
-    breaks = as.POSIXct(timestamps$sampdate),
+    breaks = as.POSIXct(timestamps$sampdate, tz=tz),
     labels = paste0(xlabel_time, "\n", timestamps$Step))
 }

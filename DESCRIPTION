@@ -1,6 +1,6 @@
 Package: Rcollectl
 Title: Help use collectl with R in Linux
-Version: 0.0.15
+Version: 0.99.0
 Date: 2022-11-09
 Authors@R: 
     person(given = "Vincent",
@@ -17,9 +17,8 @@ URL: https://github.com/vjcitn/Rcollectl
 BugReports: https://support.bioconductor.org/t/Rcollectl
 biocViews: Software, Infrastructure
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 SystemRequirements: collectl
 Suggests: 
     knitr,

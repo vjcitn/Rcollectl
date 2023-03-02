@@ -78,6 +78,7 @@ cl_timestamp_layer <- function(arg) {
 }
 
 #' @rdname cl_timestamp
+#' @param tz character(1) time zone code
 #' @export
 cl_timestamp_label <- function(arg, tz="EST") {
   usage_df_all <- cl_collectl_data(arg)

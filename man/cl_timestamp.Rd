@@ -18,6 +18,8 @@ cl_timestamp_label(arg, tz = "EST")
 \item{step}{character(1) name of step within a workflow}
 
 \item{arg}{proc (an entity inheriting from "Rcollectl_process" S3 class) or path to collectl output}
+
+\item{tz}{character(1) time zone code}
 }
 \value{
 \code{cl_timestamp()} returns a tab delimited text file

@@ -1,3 +1,4 @@
+# test
 # timestamp file name
 cl_timestamp_file <- function(proc) {
   paste0(proc$target, "-", proc$node_name, "-", proc$date, ".timestamp.txt")
@@ -10,8 +11,7 @@ cl_timestamp_file <- function(proc) {
 #' @param step character(1) name of step within a workflow
 #' @return `cl_timestamp()` returns a tab delimited text file
 #' @examples
-#' randname = basename(tempfile())
-#' id <- cl_start(randname)
+#' id <- cl_start() 
 #' Sys.sleep(2)
 #' #code
 #' cl_timestamp(id, "step1")

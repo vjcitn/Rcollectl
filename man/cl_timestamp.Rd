@@ -30,8 +30,7 @@ cl_timestamp_label(arg, tz = "EST")
 Functions to add time stamps to collectl output
 }
 \examples{
-randname = basename(tempfile())
-id <- cl_start(randname)
+id <- cl_start() 
 Sys.sleep(2)
 #code
 cl_timestamp(id, "step1")

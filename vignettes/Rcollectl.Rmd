@@ -5,6 +5,10 @@ author:
     affiliation:
     - Harvard Medical School
     email: stvjc@channing.harvard.edu
+  - name: Yubo Cheng
+    affiliation:
+    - Roswell Park Comprehensive Cancer Center
+    email: yubo.cheng@roswellpark.org
 output: 
   BiocStyle::html_document:
     self_contained: yes
@@ -97,11 +101,32 @@ plot_usage(usage_df)
 # Timestamps
 
 Yubo Cheng has added functionality allowing us to annotate
-usage plots with labels related to task phases.
+usage plots with labels related to task phases.  Here is
+the code from the example showing how to introduce annotations
+in the time profile.
 
-```{r lkts, eval=FALSE}
-# github action is failing here, let's see if that's all 
-example(cl_timestamp, ask=FALSE)
+```{r lkts}
+     id <- cl_start()
+     Sys.sleep(2)
+     #code
+     cl_timestamp(id, "step1")
+     Sys.sleep(2)
+     # code
+     Sys.sleep(2)
+     cl_timestamp(id, "step2")
+     Sys.sleep(2)
+     # code
+     Sys.sleep(2)
+     cl_timestamp(id, "step3")
+     Sys.sleep(2)
+     # code
+     cl_stop(id)
+     path <- cl_result_path(id)
+     
+     plot_usage(cl_parse(path)) +
+       cl_timestamp_layer(path) +
+       cl_timestamp_label(path) +
+       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 
 

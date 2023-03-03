@@ -19,9 +19,12 @@ start collectl if possible
 \examples{
 if (cl_exists()) {
   zz = cl_start()
+  Sys.sleep(2)
   print(zz)
+  Sys.sleep(2)
   print(cl_result_path(zz))
   cl_stop(zz)
+  Sys.sleep(2)
   zz$process$is_alive()
 }
 }

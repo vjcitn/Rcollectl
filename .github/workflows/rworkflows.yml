@@ -21,11 +21,13 @@ jobs:
           cont: bioconductor/bioconductor_docker:devel
           rspm: https://packagemanager.rstudio.com/cran/__linux__/focal/release
     steps:
-    - run: apt-get install -y collectl
+    - run: |
+        apt-get update
+        apt-get install -y collectl
     - uses: neurogenomics/rworkflows@master
       with:
         run_bioccheck: ${{ false }}
-        run_rcmdcheck: ${{ true }}
+        run_rcmdcheck: ${{ true }}BiocHail/actions/runs/4330488440/jobs/7627732387
         as_cran: ${{ true }}
         run_vignettes: ${{ true }}
         has_testthat: ${{ true }}

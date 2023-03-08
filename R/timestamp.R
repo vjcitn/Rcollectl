@@ -11,6 +11,7 @@ cl_timestamp_file <- function(proc) {
 #' @param step character(1) name of step within a workflow
 #' @return `cl_timestamp()` returns a tab delimited text file
 #' @examples
+#' \dontrun{   # SPB choking here?
 #' id <- cl_start() 
 #' Sys.sleep(2)
 #' #code
@@ -26,6 +27,7 @@ cl_timestamp_file <- function(proc) {
 #' Sys.sleep(2)
 #' # code
 #' cl_stop(id)
+#' }
 #' @export
 cl_timestamp <- function(proc, step) {
   con <- file(cl_timestamp_file(proc))

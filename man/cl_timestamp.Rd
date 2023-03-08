@@ -30,6 +30,7 @@ cl_timestamp_label(arg, tz = "EST")
 Functions to add time stamps to collectl output
 }
 \examples{
+\dontrun{   # SPB choking here?
 id <- cl_start() 
 Sys.sleep(2)
 #code
@@ -45,6 +46,7 @@ cl_timestamp(id, "step3")
 Sys.sleep(2)
 # code
 cl_stop(id)
+}
 path <- cl_result_path(id)
 
 plot_usage(cl_parse(path)) +

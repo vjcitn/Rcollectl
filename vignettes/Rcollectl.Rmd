@@ -105,8 +105,8 @@ usage plots with labels related to task phases.  Here is
 the code from the example showing how to introduce annotations
 in the time profile.
 
-```{r lkts}
-     id <- cl_start()
+```{r lkts, eval=FALSE}
+     id <- cl_start() # March 8 blocking as SPB is erroring here
      Sys.sleep(2)
      #code
      cl_timestamp(id, "step1")

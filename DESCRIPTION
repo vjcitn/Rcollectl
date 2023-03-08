@@ -1,6 +1,6 @@
 Package: Rcollectl
 Title: Help use collectl with R in Linux
-Version: 0.99.1
+Version: 0.99.2
 Date: 2022-11-09
 Authors@R: 
     c(person(given = "Vincent",

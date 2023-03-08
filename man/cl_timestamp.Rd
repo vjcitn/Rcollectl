@@ -30,27 +30,24 @@ cl_timestamp_label(arg, tz = "EST")
 Functions to add time stamps to collectl output
 }
 \examples{
-\dontrun{   # SPB choking here?
+\dontrun{ 
 id <- cl_start() 
 Sys.sleep(2)
-#code
 cl_timestamp(id, "step1")
 Sys.sleep(2)
-# code
 Sys.sleep(2)
 cl_timestamp(id, "step2")
 Sys.sleep(2)
-# code
 Sys.sleep(2)
 cl_timestamp(id, "step3")
 Sys.sleep(2)
-# code
 cl_stop(id)
 }
+\dontrun{
 path <- cl_result_path(id)
-
 plot_usage(cl_parse(path)) +
   cl_timestamp_layer(path) +
   cl_timestamp_label(path) +
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))
+}
 }

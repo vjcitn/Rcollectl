@@ -2,7 +2,6 @@
 #' @importFrom lubridate as_datetime
 #' @importFrom utils browseURL read.delim
 #' @param path character(1) path to (possibly gzipped) collectl output
-#' @param n_to_skip numeric(1) number of initial lines skipped but saved as 'meta' attribute
 #' @param tz character(1) POSIXct time zone code, defaults to "EST"
 #' @return a data.frame
 #' @note A lubridate datetime is added as a column.
@@ -10,9 +9,13 @@
 #' lk = cl_parse(system.file("demotab/demo_1123.tab.gz", package="Rcollectl"))
 #' head(lk)
 #' @export
-cl_parse = function(path, n_to_skip=14, tz="EST") {
-	meta = readLines(path, n=n_to_skip)
-	dat = read.delim(path, skip=n_to_skip, check.names=FALSE, sep=" ")
+cl_parse = function(path, tz="EST") {
+	full = readLines(path)
+        inds = grep("^####", full)
+        stopifnot(length(inds)==2)
+        lastm = inds[2]
+	meta = readLines(path)[seq_len(lastm)]
+	dat = read.delim(path, skip=lastm, check.names=FALSE, sep=" ")
 	names(dat) = gsub("\\[(...)\\]", "\\1_", names(dat))
         dat = revise_date(dat, tz=tz)
 	attr(dat, "meta") = meta

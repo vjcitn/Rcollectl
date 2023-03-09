@@ -11,7 +11,6 @@ cl_timestamp_file <- function(proc) {
 #' @param step character(1) name of step within a workflow
 #' @return `cl_timestamp()` returns a tab delimited text file
 #' @examples
-#' \dontrun{ 
 #' id <- cl_start() 
 #' Sys.sleep(2)
 #' cl_timestamp(id, "step1")
@@ -23,7 +22,6 @@ cl_timestamp_file <- function(proc) {
 #' cl_timestamp(id, "step3")
 #' Sys.sleep(2)
 #' cl_stop(id)
-#' }
 #' @export
 cl_timestamp <- function(proc, step) {
   con <- file(cl_timestamp_file(proc))
@@ -63,13 +61,11 @@ cl_timestamp_data <- function(arg, tz="EST") {
 #' @param arg proc (an entity inheriting from "Rcollectl_process" S3 class) or path to collectl output
 #' @return `cl_timestamp_layer()` and `cl_timestamp_label()` return objects that can be combined with ggplot.
 #' @examples
-#' \dontrun{
 #' path <- cl_result_path(id)
 #' plot_usage(cl_parse(path)) +
 #'   cl_timestamp_layer(path) +
 #'   cl_timestamp_label(path) +
 #'   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))
-#' }
 #' @export
 cl_timestamp_layer <- function(arg) {
   timestamps <- cl_timestamp_data(arg)

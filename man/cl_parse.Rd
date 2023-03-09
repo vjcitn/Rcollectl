@@ -4,12 +4,10 @@
 \alias{cl_parse}
 \title{parse a collectl output -- could be conditional on discovered call}
 \usage{
-cl_parse(path, n_to_skip = 14, tz = "EST")
+cl_parse(path, tz = "EST")
 }
 \arguments{
 \item{path}{character(1) path to (possibly gzipped) collectl output}
-
-\item{n_to_skip}{numeric(1) number of initial lines skipped but saved as 'meta' attribute}
 
 \item{tz}{character(1) POSIXct time zone code, defaults to "EST"}
 }

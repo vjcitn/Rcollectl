@@ -4,7 +4,10 @@
 \alias{browse_units}
 \title{browse a page defining units of collectl reporting}
 \usage{
-browse_units()
+browse_units(...)
+}
+\arguments{
+\item{\dots}{passed to \link{browseURL}}
 }
 \value{
 side effect is running browseURL
